@@ -56,6 +56,7 @@ namespace DiffReducer.UI
         void setEnabled(bool value)
         {
             modEnabled = value;
+            Config.Write(); // Save the new state to the config file
         }
         private float _beatDivision = 1.5f;
         [UIValue("beatDivision")]
@@ -139,6 +140,19 @@ namespace DiffReducer.UI
             if (currentBeatmap == null) return;
             var result = BeatmapSimplifier.SimplifyBeatmap(await currentBeatmap.GetBeatmapDataAsync(currentBeatmap.level.environmentInfo, null) as BeatmapData, currentBeatmap.level.beatsPerMinute);
             ModifierUI.instance.UpdateSimplifiedMap(result.Item1, result.Item2, result.Item3);
+        }
+
+        private float _disableBelowThisNPS = 5f;
+        [UIValue("DisableBelowThisNPS")]
+        public float DisableBelowThisNPS
+        {
+            get => _disableBelowThisNPS;
+            set
+            {
+                _disableBelowThisNPS = value;
+                NotifyPropertyChanged();
+                Config.Write(); // Write to config when value changes
+            }
         }
     }
 }
