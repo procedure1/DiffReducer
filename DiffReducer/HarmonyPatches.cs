@@ -18,7 +18,7 @@ namespace DiffReducer
     {
         static void Postfix(IReadonlyBeatmapData beatmapData, ref IReadonlyBeatmapData __result, bool leftHanded)
         {
-            if (!BS_Utils.Plugin.LevelData.IsSet || !UI.ModifierUI.instance.modEnabled) return;//BW BS_Utils.Plugin.LevelData.Mode != BS_Utils.Gameplay.Mode.Standard
+            if (!BS_Utils.Plugin.LevelData.IsSet || !UI.ModifierUI.instance.modEnabled || BS_Utils.Plugin.LevelData.Mode != BS_Utils.Gameplay.Mode.Standard)//not multiplayer or mission etc
 
             if (TransitionPatcher.originalNPS < ModifierUI.instance.DisableBelowThisNPS)
             {
