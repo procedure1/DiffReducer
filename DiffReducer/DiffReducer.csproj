@@ -172,6 +172,7 @@
     <None Include=".gitignore" />
     <EmbeddedResource Include="UI\modifierUI.bsml" />
     <None Include="BuildTargets.targets" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
