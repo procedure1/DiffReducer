@@ -11,7 +11,8 @@ namespace DiffReducer
 {
 
     #region 2 Postfix - CreateTransformedBeatmapData
-    //2 BW runs after StandardLevelDetailView. This alters the beat map data
+    //BW runs after StandardLevelDetailView. This alters the beat map data
+    //BW Log statements show that 360fyer creates __result before this runs.
     [HarmonyPatch(typeof(BeatmapDataTransformHelper))]
     [HarmonyPatch("CreateTransformedBeatmapData")]
     class DiffReductionPatch
@@ -19,6 +20,7 @@ namespace DiffReducer
         static void Postfix(IReadonlyBeatmapData beatmapData, ref IReadonlyBeatmapData __result, bool leftHanded)
         {
             if (!BS_Utils.Plugin.LevelData.IsSet || !UI.ModifierUI.instance.modEnabled || BS_Utils.Plugin.LevelData.Mode != BS_Utils.Gameplay.Mode.Standard)//not multiplayer or mission etc
+                return;
 
             if (TransitionPatcher.originalNPS < ModifierUI.instance.DisableBelowThisNPS)
             {
@@ -30,13 +32,12 @@ namespace DiffReducer
 
             BS_Utils.Gameplay.ScoreSubmission.DisableSubmission("DiffReducer");
 
-            __result = beatmapData.GetFilteredCopy(x =>
+            __result = __result.GetFilteredCopy(x =>
             {
-
                 if (x is BeatmapObjectData && !UI.ModifierUI.instance.simplifiedMap.Any(y => x.CompareTo(y) == 0))
                     return null;
                 return x;
-            });
+            });//BW __result = beatmapData.GetFilteredCopy(x =>... was the original statement. It now works with 360fyer using__result = __result.GetFilteredCopy(x =>
         }
     }
     #endregion
@@ -44,7 +45,7 @@ namespace DiffReducer
     #region 1 Prefix - StartStandardLevel --BW added this so can decide if want to disable plugin automatically based on original NPS
     //BW 2nd item that runs after StandardLevelDetailView
     //Runs when you click play button
-    //I think this requires colors.dll - i put several dlls in but it started to work with colors.dll
+    //I think this requires colors.dll - got errors in BS logs. i put several dlls in but it started to work with colors.dll
     [HarmonyPatch(typeof(MenuTransitionsHelper))]
     [HarmonyPatch("StartStandardLevel", new[] { typeof(string), typeof(IDifficultyBeatmap), typeof(IPreviewBeatmapLevel), typeof(OverrideEnvironmentSettings), typeof(ColorScheme), typeof(ColorScheme), typeof(GameplayModifiers), typeof(PlayerSpecificSettings), typeof(PracticeSettings), typeof(string), typeof(bool), typeof(bool), typeof(Action), typeof(Action<DiContainer>), typeof(Action<StandardLevelScenesTransitionSetupDataSO, LevelCompletionResults>), typeof(Action<LevelScenesTransitionSetupDataSO, LevelCompletionResults>), typeof(RecordingToolManager.SetupData) })]//v1.34 added last item
     public class TransitionPatcher
