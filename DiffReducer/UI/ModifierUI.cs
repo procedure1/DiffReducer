@@ -139,7 +139,7 @@ namespace DiffReducer.UI
         {
             if (currentBeatmap == null) return;
             var result = BeatmapSimplifier.SimplifyBeatmap(await currentBeatmap.GetBeatmapDataAsync(currentBeatmap.level.environmentInfo, null) as BeatmapData, currentBeatmap.level.beatsPerMinute);
-            ModifierUI.instance.UpdateSimplifiedMap(result.Item1, result.Item2, result.Item3);
+            ModifierUI.instance.UpdateSimplifiedMap(result.initialNps, result.finalNps, result.newMap);
         }
 
         private float _disableBelowThisNPS = 5f;
