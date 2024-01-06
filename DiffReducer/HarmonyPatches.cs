@@ -15,6 +15,7 @@ namespace DiffReducer
     //BW Log statements show that 360fyer creates __result before this runs.
     [HarmonyPatch(typeof(BeatmapDataTransformHelper))]
     [HarmonyPatch("CreateTransformedBeatmapData")]
+    //[HarmonyPriority(Priority.First)]
     class DiffReductionPatch
     {
         static void Postfix(IReadonlyBeatmapData beatmapData, ref IReadonlyBeatmapData __result, bool leftHanded)
@@ -32,12 +33,18 @@ namespace DiffReducer
 
             BS_Utils.Gameplay.ScoreSubmission.DisableSubmission("DiffReducer");
 
+            int originalNoteCount = __result.cuttableNotesCount;
+
+            var simplifiedBeatmap = BeatmapSimplifier.SimplifyBeatmap(__result as BeatmapData, UI.ModifierUI.instance.currentBeatmap.level.beatsPerMinute);
+
             __result = __result.GetFilteredCopy(x =>
             {
-                if (x is BeatmapObjectData && !UI.ModifierUI.instance.simplifiedMap.Any(y => x.CompareTo(y) == 0))
+                if (x is BeatmapObjectData && !simplifiedBeatmap.newMap.Any(y => x.CompareTo(y) == 0))
                     return null;
                 return x;
             });//BW __result = beatmapData.GetFilteredCopy(x =>... was the original statement. It now works with 360fyer using__result = __result.GetFilteredCopy(x =>
+
+            Plugin.log.Info($"Original Note Count: {originalNoteCount} - New Note Count: {__result.cuttableNotesCount}");
         }
     }
     #endregion
